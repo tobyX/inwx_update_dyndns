@@ -64,4 +64,4 @@ with open("/var/local/inwx_cache.toml") as f:
     cached_data = toml.loads(f.read())
 
 while not update_ips(settings, cached_data):
-    sleep(settings[""])
+    sleep(settings["retry_after"])
