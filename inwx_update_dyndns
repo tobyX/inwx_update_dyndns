@@ -62,12 +62,11 @@ if not settings["ipv6_commands"]:
     print("At least one ipv6_command must be defined.", file=sys.stderr)
     
 if not os.path.exists("/var/local/inwx_cache.toml"):
-    with open('/var/local/inwx_cache.toml', 'w'): pass
+    with open('/var/local/inwx_cache.toml', 'w') as f:
+        f.write(toml.dumps({"ipv4": "", "ipv6": ""}))
 
 with open("/var/local/inwx_cache.toml", "r") as f:
     cached_data = toml.loads(f.read())
-    if not cached_data:
-        cached_data = {"ipv4": "", "ipv6": ""}
 
 while not update_ips(settings, cached_data):
     sleep(settings["retry_after"])
