@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import subprocess
 import ipaddress
 from time import sleep
@@ -13,9 +14,9 @@ def obtain_ip(commands, version):
     try:
         ip_string = subprocess.check_output(command).decode('ascii').strip()
         if version == 4:
-            return ipaddress.IPv4Address(ip_string)
+            return str(ipaddress.IPv4Address(ip_string))
         elif version == 6:
-            return ipaddress.IPv6Address(ip_string)
+            return str(ipaddress.IPv6Address(ip_string))
     except Exception as e:
         error_str = "Exception caught while running command \"{}\": {}"
         print(error_str.format(cmd_string, e), file=sys.stderr)
@@ -42,12 +43,12 @@ def update_ips(settings, cached_data):
                 r = requests.post(url, auth=(account["username"], account["password"]))
                 print("inwx server replied:", r.text)
                 
-            with open("/var/local/inwx_cache.toml") as f:
-                toml.dumps(new_data)
+            with open("/var/local/inwx_cache.toml", "w") as f:
+                f.write(toml.dumps(new_data))
         
         return True
 
-    except:
+    except Exception as e:
         # Exception might be raised if there is no internet connectivity temporarily.
         print("All commands failed to obtain a valid IP address.", file=sys.stderr)
         return False
@@ -60,8 +61,13 @@ if not settings["ipv4_commands"]:
 if not settings["ipv6_commands"]:
     print("At least one ipv6_command must be defined.", file=sys.stderr)
     
-with open("/var/local/inwx_cache.toml") as f:
+if not os.path.exists("/var/local/inwx_cache.toml"):
+    with open('/var/local/inwx_cache.toml', 'w'): pass
+
+with open("/var/local/inwx_cache.toml", "r") as f:
     cached_data = toml.loads(f.read())
+    if not cached_data:
+        cached_data = {"ipv4": "", "ipv6": ""}
 
 while not update_ips(settings, cached_data):
     sleep(settings["retry_after"])
