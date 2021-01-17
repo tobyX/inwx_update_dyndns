@@ -17,12 +17,6 @@ ipv6_commands = [
     ["curl", "-6", "--fail", "-s", "-S", "http://v6.ident.me"],      # fallback
 ]
 
-# Check if the IP has changed every 10 seconds.
-# Note that this script is not going to send a new HTTP request to INWX every
-# sleep_interval seconds, instead, it will run the commands mentioned above. If
-# the IP has not changed, no new HTTP request is sent.
-sleep_interval = 10
-
 # If all commands failed to obtain a valid IP address, wait 3 minutes before
 # retrying. This setting is used to avoid spamming log files when there is no
 # internet connectivity temporarily.
